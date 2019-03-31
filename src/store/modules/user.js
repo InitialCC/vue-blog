@@ -1,10 +1,10 @@
 import * as types from '../types'
 import { login, logout } from '../../api/login'
-import { getToken, setToken, removeToken } from '../../utils/auth'
+// import { getToken, setToken, removeToken } from '../../utils/auth'
 const state = {
     user: {},
     title: '',
-    token: getToken(),
+    token: '',
     name: '',
     avatar: '',
     roles: []
@@ -19,12 +19,13 @@ const mutations = {
     userStatus(state, flag) {
         state.isLogin = flag
     },
-    [types.LOGIN]: (state, data) => {
-        localStorage.token = data;
-        state.token = data;
+    [types.LOGIN]: (state, token) => {
+        localStorage.setItem('USER_TOKEN', token)
+        // localStorage.token = data;
+        state.token = token;
     },
     [types.LOGOUT]: (state) => {
-        localStorage.removeItem('token');
+        localStorage.removeItem('USER_TOKEN');
         state.token = null
     }
 
@@ -36,10 +37,9 @@ const actions = {
         return new Promise((resolve, reject) => {
             login(username, userInfo.password).then(response => {
                 const data = response.data
-                // const tokenStr = data.tokenHead + data.token
-                // setToken(tokenStr)
-                // commit('user', tokenStr)
-                resolve()
+                const tokenStr = data.token
+                commit(types.LOGIN, tokenStr)
+                resolve(data)
             }).catch(error => {
                 reject(error)
             })
